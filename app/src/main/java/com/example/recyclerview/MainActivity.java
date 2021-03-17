@@ -1,56 +1,74 @@
 package com.example.recyclerview;
 
-import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
+import org.apache.commons.io.IOUtils;
 
-import android.view.Menu;
-import android.view.MenuItem;
+import java.io.InputStream;
+import java.util.LinkedList;
+
+
+/*
+ * Answers to questions
+ *
+ * Q1 - Which of the following statements about a RecyclerView is false?
+ * A1 - You don't need a layout manager with a RecyclerView to handle the hierarchy and layout of View elements.
+ *
+ * Q2 - Which of the following is the primary component you need to provide to an adapter a View item and its position within a RecyclerView?
+ * A2 - RecyclerView.ViewHolder
+ *
+ * Q3 - Which interface do you need to implement in order to listen and respond to user clicks in a RecyclerView?
+ * A3 - View.onClickListener
+ * */
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+    private final LinkedList<String> mRecipeNames = new LinkedList<>();
+    private final LinkedList<String> mRecipeDesc = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        readFile(getResources().openRawResource(R.raw.recipe_names), mRecipeNames);
+        readFile(getResources().openRawResource(R.raw.recipe_desc), mRecipeDesc);
+        RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
+        RecipeListAdapter mAdapter = new RecipeListAdapter(this, mRecipeNames, mRecipeDesc);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    private void readFile(InputStream ins, LinkedList<String> list) {
+        String contents = null;
+        String [] contents_array = null;
+        int i;
+        try{
+            contents = IOUtils.toString(ins);
+            System.out.println(contents);
+            IOUtils.closeQuietly(ins);
+        }
+        catch (Exception e){
+            Log.e(TAG, Log.getStackTraceString(e));
         }
 
-        return super.onOptionsItemSelected(item);
+        if (contents != null) {
+            contents_array = contents.split("\\r?\\n");
+        }
+        if (contents_array != null) {
+            for (i = 0; i < contents_array.length ; i++){
+                list.add(i, contents_array[i]);
+                Log.d("ARRAY CONTENTS", contents_array[i]);
+
+            }
+        }
     }
 }
