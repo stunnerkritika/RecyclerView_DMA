@@ -30,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        for (int i = 0; i < 20; i++) {
+            mWordList.addLast("Word " + i);
+        }
     }
 
     @Override
